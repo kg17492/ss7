@@ -36,11 +36,18 @@ class String(str):
             string = string.replace(old, new)
         return String(string)
 
-    def read_as_dict(self, *keys: list[str]) -> list[dict]:
+    def read_as_dict(self, *float_keys: list[str]) -> list[dict]:
+        print("read_as_dict")
+
         def str2float(d: dict[str, str]) -> dict:
             for key in d:
-                if d[key] is str:
-                    d[key] = (float if key in keys else String)(d[key].strip())
+                if type(d[key]) is str:
+                    d[key] = String(d[key].strip())
+                    if key in float_keys:
+                        try:
+                            d[key] = float(d[key])
+                        except ValueError:
+                            pass
             return d
 
         with io.StringIO() as fp:

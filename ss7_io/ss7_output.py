@@ -13,51 +13,45 @@ def floor_formatter(floor: str) -> str:
 class SS7_Output(SS7_Reader):
     """出力ファイルから各sectionを適当な辞書形式に読み替える
     """
-    def get(self, key: str):
-        if key not in self.gotten_dict:
-            data: Section = super().get(key)
-
-            def temp():
-                if any([
-                    key in data.name for key in [
-                        "建物情報",
-                        "断面リスト",
-                        "長期支点反力表",
-                        "長期支点反力表 支点反力 [kN] B1FL",
-                        "浮き上がりのチェック",
-                        "ルート判定表",
-                        "風圧力基本データ",
-                        "地震力基本データ",
-                    ]
-                ]):
-                    return data.read_as_list_of_table()
-                elif data.name in ["崩壊メカニズム"]:
-                    return data.read_as_list_of_line()
-                elif "SRC耐震壁保証設計(SRC規準)" in data.name:
-                    def paragraph2dict(p: ss7_tool.String) -> dict[str, str]:
-                        result: list[dict[str, str]] = Section(
-                            data.name,
-                            data.keys,
-                            p,
-                        ).read_as_list_of_dict()
-                        result[0]["右軸"] = result[0].pop("軸")
-                        result[0]["左軸"] = result[-1].pop("軸")
-                        result[0]["twmm"] = result[-1].pop("twmm")
-                        return result[0]
-                    return [paragraph2dict(p) for p in data.stripsplit(",<RE>\n")]
-                elif any([
-                    key in data.name for key in [
-                        "RC耐震壁保証設計(靭性指針式)",
-                        "地震用重量",
-                        "梁剛性表",
-                    ]
-                ]):
-                    return data.read_first_line_as_list_of_dict()
-                else:
-                    return data.read_self()
-
-            self.gotten_dict[key] = temp()
-        return self.gotten_dict[key]
+    def get_without_cache(self, key: str):
+        data: Section = super().get_without_cache(key)
+        if any([
+            key in data.name for key in [
+                "建物情報",
+                "断面リスト",
+                "長期支点反力表",
+                "長期支点反力表 支点反力 [kN] B1FL",
+                "浮き上がりのチェック",
+                "ルート判定表",
+                "風圧力基本データ",
+                "地震力基本データ",
+            ]
+        ]):
+            return data.read_as_list_of_table()
+        elif data.name in ["崩壊メカニズム"]:
+            return data.read_as_list_of_line()
+        elif "SRC耐震壁保証設計(SRC規準)" in data.name:
+            def paragraph2dict(p: ss7_tool.String) -> dict[str, str]:
+                result: list[dict[str, str]] = Section(
+                    data.name,
+                    data.keys,
+                    p,
+                ).read_as_list_of_dict()
+                result[0]["右軸"] = result[0].pop("軸")
+                result[0]["左軸"] = result[-1].pop("軸")
+                result[0]["twmm"] = result[-1].pop("twmm")
+                return result[0]
+            return [paragraph2dict(p) for p in data.stripsplit(",<RE>\n")]
+        elif any([
+            key in data.name for key in [
+                "RC耐震壁保証設計(靭性指針式)",
+                "地震用重量",
+                "梁剛性表",
+            ]
+        ]):
+            return data.read_first_line_as_list_of_dict()
+        else:
+            return data.read_self()
 
     def load_key(self, load: str) -> str:
         """loadで指定された載荷を適当なkeyに変換する

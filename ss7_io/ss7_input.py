@@ -22,10 +22,8 @@ class SS7_Input(SS7_Reader):
             int(self.get("基本事項")["建物概要Y方向スパン数"]),
         )
 
-    def get(self, key: str):
-        if key not in self.gotten_dict:
-            self.gotten_dict[key] = super().get(key).read_self()
-        return self.gotten_dict[key]
+    def get_without_cache(self, key: str):
+        return super().get_without_cache(key).read_self()
 
     def axis_location(self) -> list[float]:
         """軸名に対応した軸の座標を返す

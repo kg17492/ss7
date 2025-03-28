@@ -86,8 +86,8 @@ class Section(ss7_tool.String):
         else:
             return self.read_as_list_of_table()
 
-    def read_as_list_of_dict(self) -> list[dict[str, str]]:
-        return ss7_tool.String(f'{",".join(self.keys)}\n{self.replace(",<RE>", "")}').read_as_dict()
+    def read_as_list_of_dict(self, *float_keys: list[str]) -> list[dict[str, str]]:
+        return ss7_tool.String(f'{",".join(self.keys)}\n{self.replace(",<RE>", "")}').read_as_dict(*float_keys)
 
     def read_as_list_of_table(self) -> list[ss7_tool.Table]:
         return [p.read_as_table() for p in filter(lambda p: len(p[0]) > 0, self.stripsplit(",<RE>\n"))]
@@ -107,8 +107,7 @@ class SS7_Reader(list[Section]):
     """SS7_InputとSS7_Outputの親クラス
     """
     filename: str
-    gotten_list: list[str] = []
-    gotten_dict: dict[str, str] = {}
+    gotten_dict: dict = {}
 
     def __init__(self, filename: str) -> None:
         """
@@ -137,16 +136,20 @@ class SS7_Reader(list[Section]):
         """keywordを含むkeyを全て返す"""
         return [d.name for d in self.search(keyword)]
 
-    def get(self, key: str) -> Section:
+    def get_without_cache(self, key: str) -> Section:
         """keyによって指定される事項のデータ[配列]を1つ返す
         """
-        self.gotten_list.append(key)
         found_dict: list[Section] = self.search(key)
         if len(found_dict) < 1:
-            if key not in self.gotten_list[:-1]:
+            if key not in self.gotten_dict:
                 print(f"{key}に該当するデータはありません。")
             return None
-        elif len(found_dict) > 1 and key not in self.gotten_list[:-1]:
+        elif len(found_dict) > 1 and key not in self.gotten_dict:
             print(f"{key}に該当するデータが複数あります: " + " ".join([d.name for d in found_dict]))
 
         return found_dict[0]
+
+    def get(self, key: str) -> Section:
+        if key not in self.gotten_dict:
+            self.gotten_dict[key] = self.get_without_cache(key)
+        return self.gotten_dict[key]
