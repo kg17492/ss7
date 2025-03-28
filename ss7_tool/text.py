@@ -165,3 +165,14 @@ class Table(list[list[str]]):
             writer.writerows(self)
             fp.seek(0)
             return fp.read()
+
+
+def read_text(filename: str, encoding: str = "cp932") -> "String":
+    """<filename>で指定されるファイルを文字列（ich.String）で返す。
+
+    Args:
+        filename (str): ファイルのパス
+        encoding (str): 文字コード
+    """
+    with open(filename, "r", encoding=encoding) as fp:
+        return String(fp.read())

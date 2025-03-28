@@ -1,8 +1,23 @@
-from .ss7_reader import SS7_Reader
+from .ss7_reader import SS7_Reader, Section
 import numpy as np
 
 
 class SS7_Sekisan(SS7_Reader):
+    def get(self, key: str):
+        if key not in self.gotten_dict:
+            data: Section = super().get(key)
+
+            def temp():
+                if data.name in [
+                    "部位別集計表(鉄骨)"
+                ]:
+                    return data.read_as_list_of_dict()
+                else:
+                    return data.read_self()
+
+            self.gotten_dict[key] = temp()
+        return self.gotten_dict[key]
+
     def get_index(self, key: str, element: str) -> int:
         return [row[key] for row in self.get("部位別集計表")].index(element)
 

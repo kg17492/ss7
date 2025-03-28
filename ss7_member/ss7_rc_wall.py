@@ -342,10 +342,10 @@ class SS7_RC_Wall(SS7_Member_Between_Columns):
         rv: str,
         rh: str,
         rd: str,
-        nv: int = None,
-        nh: int = None,
-        nrv: int = None,
-        nrh: int = None,
+        nv: int | None = None,
+        nh: int | None = None,
+        nrv: int | None = None,
+        nrh: int | None = None,
     ) -> None:
         if nv is None:
             nv = len(self.openings)
