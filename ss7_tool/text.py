@@ -37,8 +37,6 @@ class String(str):
         return String(string)
 
     def read_as_dict(self, *float_keys: list[str]) -> list[dict]:
-        print("read_as_dict")
-
         def str2float(d: dict[str, str]) -> dict:
             for key in d:
                 if type(d[key]) is str:
@@ -47,7 +45,7 @@ class String(str):
                         try:
                             d[key] = float(d[key])
                         except ValueError:
-                            pass
+                            continue
             return d
 
         with io.StringIO() as fp:
