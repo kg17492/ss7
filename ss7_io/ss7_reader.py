@@ -107,7 +107,7 @@ class SS7_Reader(list[Section]):
     """SS7_InputとSS7_Outputの親クラス
     """
     filename: str
-    gotten_dict: dict = {}
+    gotten_dict: dict
 
     def __init__(self, filename: str) -> None:
         """
@@ -116,7 +116,7 @@ class SS7_Reader(list[Section]):
         """
 
         self.filename = filename
-        self.gotten_list = []
+        self.gotten_dict = {}
         super().__init__([Section_Temp(
             s if "ApName" in s else f'name={s}'
         ).section() for s in ss7_tool.read_text(
